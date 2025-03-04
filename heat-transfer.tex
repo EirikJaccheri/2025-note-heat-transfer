@@ -97,6 +97,24 @@ The simulation is run for \SI{1000}{\second} with a time step of \SI{1}{\second}
 \end{figure}
 
 \section{Dittus-Boelter}
+The Dittus-Boelter correlation is a correlation intended for heat transfer from a smooth pipe to a turbulent single phase flow inside the pipe. The correlation for the Nusselt number is given by
+\begin{equation}
+    Nu = 0.023 Re^{0.8} Pr^{0.4}\;,
+\end{equation} 
+where the reynolds number is given by $Re = \frac{\rho_{\text{m}} u_{\text{m}} d}{\mu_{\text{m}}}$, where the subscript $m$ denotes the volume averaged quantity and $d$ is the diameter of the pipe. The Prandtl number is given by $Pr = \frac{C_{\text{p}} \mu_{\text{m}}}{k_{\text{m}}}$, where $C_{\text{p}}$ is the heat capacity at constant pressure, taking the mass average over the two phases. 
+\section{Gungor-Winterton 87}
+The gungor-winterton correlation is a correlation intended for flow boiling in a pipe, where the heat from the pipe wall causes the fluid to boil. The correlation is given in terms of an enhancement factor $E$, multiplied with the heat transfer predictet by the Dittus-Boelter correlation, if the pipe was filled with a single phase liquid
+\begin{equation}
+    h_{\ell} = Nu_{\ell} k_{\ell} / d = 0.023 \left(\frac{G  \left(1 - \beta_{\text{v}}\right) d}{\mu_{\ell}} \right)^{0.8} Pr^{0.4} k_{\ell} / d\;,
+\end{equation}
+where we have defined tha massflux $G = \sum_{k} \alpha_{k} \rho_{\text{k}} \left| u_{k}\right|$ and used the liquid prandtl number $Pr = \frac{C_{\text{p},\ell} \mu_{\ell}}{k_{\ell}}$. The enhancement factor is given by
+\begin{equation}
+    E = 1 + 3000Bo^{0.86} + 1.12 \left[\frac{\beta_{\text{v}}}{1-\beta_{\text{v}}}\right]^{0.75} \left[ \frac{\rho_{\ell}}{\rho_{\text{v}}} \right]^{0.41}\;.
+\end{equation}
+For a drift flux model, where the two phases move with different velocities, the mass fraction should be replaced with the flowing mass fraction
+\begin{equation}
+    \beta_{\text{v}}^{\text{flow}} = \frac{\alpha_{\text{v}} \rho_{\text{v}} \left| u_{\text{v}} \right|}{G}\;.
+\end{equation}
 
 \section{Pool boiling Rosenhow}
 Eq 10.5 in fundamentals of heat and mass transfer by Incropera et al. gives the heat flux in pool boiling as
@@ -106,4 +124,7 @@ Eq 10.5 in fundamentals of heat and mass transfer by Incropera et al. gives the 
 where $\mu_{\ell}$ is the viscosity of the liquid phase, $h_{\text{v}\ell} = h_{\text{v}} - h_{\ell}$ is the latent heat of evaporation, $g$ is the gravitational constant, $\rho_{\ell}$ and $\rho_{\text{v}}$ are the densities of the liquid and vapor phase, $\sigma$ is the surface tension, $c_{\text{p},\ell}$ is the specific heat of the liquid phase, $\Delta T_{\text{e}} = T - T_{\text{s}}$ is the temperature difference between the wall $T_{\text{s}}$ and the fluid $T$ and $Pr_{\ell}$ is the Prandtl number of the liquid phsase. $C_{\text{s,f}}$ and $n$ are free empirical parameters related to the fluid-solid combination. Anders used $C_{\text{s,f}} = 0.013$ and $n=1.7$. 
 
 This is the correlation used by Anders to calculate the heat transfer to the liquid phase. He needed to tweak $C_{\text{s,f}}$ to get the correct temperature in the wall. He seems to say that it does not describe the different experiments so well.
+\section{Staggered solution strategy}
+We solve the copuled fluid and wall heat transfer equations using a staggered solution strategy. In the calculation of the wall conduction, the fluid temperature is assumed to be constant. In the fluid calculation, the heat-flux from the solid is taken to be constant. Solving \cref{eq:heat_conduction} takes $T_{\text{fluid}}^n$ and $T_{\text{wall}}^n$ and returns $T_{wall}^{n+1}$ and $Q^{n+1}$. Similarly the fluid solver takes $Q^{n+1}$ as a constant while calculating $T_{\text{fluid}}^{n+1}$.
+
 \end{document}
